@@ -100,7 +100,6 @@ public class LivroDAO {
                 livros.add(livro);
             }
 
-
             return livros;
 
         } catch (Exception e) {
@@ -108,14 +107,12 @@ public class LivroDAO {
         }
     }
 
-    public static boolean updateStatusLivro(Livro livro){
+    public static boolean updateStatusLivro(Livro livro, LivroStatus status){
         String command = "UPDATE livro SET disponivel = ? WHERE id = ?";
-
-        LivroStatus novo = livro.getDisponivel() == LivroStatus.DISPONIVEL ? LivroStatus.EMPRESTADO : LivroStatus.DISPONIVEL;
 
         try(Connection conn = ConexaoDB.getConnection()){
             PreparedStatement ps = conn.prepareStatement(command);
-            ps.setString(1, novo.name());
+            ps.setString(1, status.name());
             ps.setInt(2, livro.getId());
 
             int linhasAfetadas = ps.executeUpdate();

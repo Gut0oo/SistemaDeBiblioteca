@@ -46,4 +46,20 @@ public class UsuarioDAO {
         }
     }
 
+    public static Usuario buscarPorNome(String nome){
+        String command = "SELECT id, nome, telefone FROM usuario WHERE nome = ?";
+
+        try(Connection conn = ConexaoDB.getConnection()){
+            PreparedStatement ps = conn.prepareStatement(command);
+            ps.setString(1, nome);
+
+            ResultSet result = ps.executeQuery();
+
+            return (result.next()) ? new Usuario(result.getInt("id"), result.getString("nome"), result.getString("telefone")) : null;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
