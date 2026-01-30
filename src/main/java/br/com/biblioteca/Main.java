@@ -9,11 +9,14 @@ import br.com.biblioteca.util.ConexaoDB;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Scanner;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) {
+
+        //Teste de conexão com BD
         try (Connection conn = ConexaoDB.getConnection()){
             if(conn != null)
                 System.out.println("✅ Conexão com o banco realizada com sucesso!");
@@ -21,12 +24,5 @@ public class Main {
             System.out.println("❌ Erro ao conectar com o banco.");
             e.printStackTrace();
         }
-
-        Usuario user1 = new Usuario("Gustavo Melo", "11 963325533");
-        Usuario user2 = new Usuario("Jose da Silva", "11 996311273");
-        Usuario user3 = new Usuario("Matheus Gonsalves", "11 904126412");
-
-        UsuarioDAO.inserirUsuario(user2);
-        UsuarioDAO.inserirUsuario(user3);
     }
 }

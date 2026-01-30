@@ -1,5 +1,6 @@
 package br.com.biblioteca.dao;
 
+import br.com.biblioteca.enums.EmprestimoStatus;
 import br.com.biblioteca.model.Emprestimo;
 import br.com.biblioteca.model.Livro;
 import br.com.biblioteca.model.Usuario;
@@ -10,6 +11,8 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EmprestimoDAO {
     public static void inserirEmprestimo(Emprestimo emprestimo){
@@ -29,7 +32,7 @@ public class EmprestimoDAO {
     }
 
     public static Emprestimo buscarEmprestimo(int id){
-        String command = "SELECT id, livro_id, usuario_id, data_emprestimo, data_devolucao FROM emprestimo WHERE id = ?";
+        String command = "SELECT id, livro_id, usuario_id, data_emprestimo, data_devolucao, status FROM emprestimo WHERE id = ?";
 
         try(Connection conn = ConexaoDB.getConnection()){
             PreparedStatement ps = conn.prepareStatement(command);
@@ -42,14 +45,15 @@ public class EmprestimoDAO {
                 int id_usuario = result.getInt("usuario_id");
                 LocalDate data_emprestimo = result.getDate("data_emprestimo").toLocalDate();
                 Date SqlData_devolucao = result.getDate("data_devolucao");
+                EmprestimoStatus status = EmprestimoStatus.valueOf(result.getString("status"));
 
                 LocalDate data_devolucao = (SqlData_devolucao != null) ? SqlData_devolucao.toLocalDate() : null;
                 Livro livro = LivroDAO.buscarPorId(id_livro);
                 Usuario user = UsuarioDAO.buscarPorId(id_usuario);
 
                 return (data_devolucao != null)
-                        ? new Emprestimo(data_emprestimo, data_devolucao, id, livro, user)
-                        : new Emprestimo(data_emprestimo, id, livro, user);
+                        ? new Emprestimo(data_emprestimo, data_devolucao, id, livro, user, status)
+                        : new Emprestimo(data_emprestimo, id, livro, user, status );
             }else
                 return null;
         } catch (Exception e) {
@@ -58,19 +62,49 @@ public class EmprestimoDAO {
     }
 
     public static boolean registrarDevolucao(int id){ //vai atualizar quando houver a devolução do livro
-        String command = "UPDATE emprestimo SET data_devolucao = ? WHERE id = ?";
+        String command = "UPDATE emprestimo SET data_devolucao = ? status = ? WHERE id = ?";
 
         try(Connection conn = ConexaoDB.getConnection()){
             PreparedStatement ps = conn.prepareStatement(command);
             LocalDate date = LocalDate.now();
 
             ps.setDate(1, Date.valueOf(date));
-            ps.setInt(2, id);
+            ps.setString(2, EmprestimoStatus.ENCERRADO.name());
+            ps.setInt(3, id);
 
             int linhasAfetadas = ps.executeUpdate();
 
             return linhasAfetadas > 0;
 
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static List<Emprestimo> buscarEmprestimosPorStatus(EmprestimoStatus status){
+        String command = "SELECT * FROM emprestimo WHERE status = ?";
+
+        try(Connection conn = ConexaoDB.getConnection()){
+
+            List<Emprestimo> lista = new ArrayList<>();
+
+            PreparedStatement ps = conn.prepareStatement(command);
+            ps.setString(1, status.name());
+
+            ResultSet result = ps.executeQuery();
+
+            while(result.next()){
+                int id = result.getInt("id");
+                Livro livro = LivroDAO.buscarPorId(result.getInt("livro_id"));
+                Usuario user = UsuarioDAO.buscarPorId(result.getInt("usuario_id"));
+                LocalDate dataEmprestimo = result.getDate("data_emprestimo").toLocalDate();
+
+                Emprestimo emprestimo = new Emprestimo(dataEmprestimo, id, livro, user, status);
+
+                lista.add(emprestimo);
+            }
+
+            return lista;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

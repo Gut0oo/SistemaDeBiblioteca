@@ -1,5 +1,7 @@
 package br.com.biblioteca.model;
 
+import br.com.biblioteca.enums.EmprestimoStatus;
+
 import java.time.LocalDate;
 
 public class Emprestimo {
@@ -7,26 +9,30 @@ public class Emprestimo {
     private Livro livro;
     private Usuario usuario;
     private LocalDate data_emprestimo, date_devolucao;
+    private EmprestimoStatus status;
 
     public Emprestimo(LocalDate data_emprestimo, Livro livro, Usuario user) {
         this.livro = livro;
         this.usuario = user;
         this.data_emprestimo = data_emprestimo;
+        this.status = EmprestimoStatus.ABERTO;
     }
 
-    public Emprestimo(LocalDate data_emprestimo, int id, Livro livro, Usuario user) {
+    public Emprestimo(LocalDate data_emprestimo, int id, Livro livro, Usuario user, EmprestimoStatus status) {
         this.id = id;
         this.livro = livro;
         this.usuario = user;
         this.data_emprestimo = data_emprestimo;
+        this.status = status;
     }
 
-    public Emprestimo(LocalDate data_emprestimo, LocalDate date_devolucao, int id, Livro livro, Usuario user) {
+    public Emprestimo(LocalDate data_emprestimo, LocalDate date_devolucao, int id, Livro livro, Usuario user, EmprestimoStatus status) {
         this.id = id;
         this.livro = livro;
         this.usuario = user;
         this.data_emprestimo = data_emprestimo;
         this.date_devolucao = date_devolucao;
+        this.status = status;
     }
 
     public LocalDate getData_emprestimo() {
@@ -63,5 +69,13 @@ public class Emprestimo {
 
     public void setUsuario(Usuario user) {
         this.usuario = user;
+    }
+
+    public EmprestimoStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(EmprestimoStatus status) {
+        this.status = status;
     }
 }
