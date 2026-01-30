@@ -23,6 +23,8 @@ public class EmprestimoService {
 
         if(user == null) throw new RuntimeException("Usuário não encontrado no Banco de dados. Por favor realizar o cadastro do usuário antes de realizar um emprestimo.");
 
+        LivroDAO.updateStatusLivro(livro, LivroStatus.EMPRESTADO);
+
         Emprestimo emprestimo = new Emprestimo(data_empre, livro, user);
         EmprestimoDAO.inserirEmprestimo(emprestimo);
         return true;
@@ -42,6 +44,8 @@ public class EmprestimoService {
         if(emprestimo == null) throw new RuntimeException("Emprestimo não existe no banco de dados");
         if(emprestimo.getStatus() == EmprestimoStatus.ENCERRADO) throw new RuntimeException("O Emprestimo já foi encerrado.");
 
+        Livro livro = emprestimo.getLivro();
+        LivroDAO.updateStatusLivro(livro, LivroStatus.DISPONIVEL);
         return EmprestimoDAO.registrarDevolucao(id);
     }
 

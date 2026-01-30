@@ -16,13 +16,14 @@ import java.util.List;
 
 public class EmprestimoDAO {
     public static void inserirEmprestimo(Emprestimo emprestimo){
-        String command = "INSERT INTO emprestimo (livro_id, usuario_id, data_emprestimo) VALUES (?, ?, ?)";
+        String command = "INSERT INTO emprestimo (livro_id, usuario_id, data_emprestimo, statusEmprestimo) VALUES (?, ?, ?, ?)";
 
         try(Connection conn = ConexaoDB.getConnection()){
             PreparedStatement ps = conn.prepareStatement(command);
             ps.setInt(1, emprestimo.getLivro().getId());
             ps.setInt(2, emprestimo.getUsuario().getId());
             ps.setDate(3, Date.valueOf(emprestimo.getData_emprestimo()));
+            ps.setString(4, emprestimo.getStatus().name());
 
             ps.execute();
 
@@ -32,7 +33,7 @@ public class EmprestimoDAO {
     }
 
     public static Emprestimo buscarEmprestimo(int id){
-        String command = "SELECT id, livro_id, usuario_id, data_emprestimo, data_devolucao, status FROM emprestimo WHERE id = ?";
+        String command = "SELECT id, livro_id, usuario_id, data_emprestimo, data_devolucao, statusEmprestimo FROM emprestimo WHERE id = ?";
 
         try(Connection conn = ConexaoDB.getConnection()){
             PreparedStatement ps = conn.prepareStatement(command);
@@ -45,7 +46,7 @@ public class EmprestimoDAO {
                 int id_usuario = result.getInt("usuario_id");
                 LocalDate data_emprestimo = result.getDate("data_emprestimo").toLocalDate();
                 Date SqlData_devolucao = result.getDate("data_devolucao");
-                EmprestimoStatus status = EmprestimoStatus.valueOf(result.getString("status"));
+                EmprestimoStatus status = EmprestimoStatus.valueOf(result.getString("statusEmprestimo"));
 
                 LocalDate data_devolucao = (SqlData_devolucao != null) ? SqlData_devolucao.toLocalDate() : null;
                 Livro livro = LivroDAO.buscarPorId(id_livro);
@@ -62,7 +63,7 @@ public class EmprestimoDAO {
     }
 
     public static boolean registrarDevolucao(int id){ //vai atualizar quando houver a devolução do livro
-        String command = "UPDATE emprestimo SET data_devolucao = ? status = ? WHERE id = ?";
+        String command = "UPDATE emprestimo SET data_devolucao = ?, statusEmprestimo = ? WHERE id = ?";
 
         try(Connection conn = ConexaoDB.getConnection()){
             PreparedStatement ps = conn.prepareStatement(command);
@@ -82,7 +83,7 @@ public class EmprestimoDAO {
     }
 
     public static List<Emprestimo> buscarEmprestimosPorStatus(EmprestimoStatus status){
-        String command = "SELECT * FROM emprestimo WHERE status = ?";
+        String command = "SELECT * FROM emprestimo WHERE statusEmprestimo = ?";
 
         try(Connection conn = ConexaoDB.getConnection()){
 
